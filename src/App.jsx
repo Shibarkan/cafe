@@ -4,6 +4,7 @@ import DashboardLayout from './pages/Dashboard/DashboardLayout';
 import HomePage from './pages/Dashboard/HomePage';
 import RiwayatPage from './pages/Dashboard/RiwayatPage';
 import TambahPesananPage from './pages/Dashboard/TambahMenu';
+import { Toaster } from 'react-hot-toast';
 
 // Import baru
 import KasirPage from './karyawan/kasir';
@@ -12,7 +13,9 @@ import PembeliPage from './pembeli/pembeli';
 function App() {
   return (
     <BrowserRouter>
+    <Toaster position="top-center" />
       <Routes>
+        
         <Route path="/" element={<LoginPage />} />
         
         {/* Dashboard Admin */}
