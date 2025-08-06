@@ -81,7 +81,7 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-72 p-4">
+      <main className="flex-1">
         {/* Mobile Toggle */}
         <button
           className="md:hidden mb-4 bg-white px-4 py-2 rounded-md shadow flex items-center gap-2"

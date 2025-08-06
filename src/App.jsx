@@ -6,7 +6,6 @@ import RiwayatPage from './pages/Dashboard/RiwayatPage';
 import TambahPesananPage from './pages/Dashboard/TambahMenu';
 import { Toaster } from 'react-hot-toast';
 
-// Import baru
 import KasirPage from './karyawan/kasir';
 import PembeliPage from './pembeli/pembeli';
 
