@@ -1,3 +1,4 @@
+// src/pages/LoginPage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff, FiSun, FiMoon } from "react-icons/fi";
@@ -6,6 +7,9 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+
   const [dark, setDark] = useState(
     () =>
       localStorage.theme === "dark" ||
@@ -14,7 +18,6 @@ export default function LoginPage() {
 
   const navigate = useNavigate();
 
-  /* --- theme switcher --- */
   useEffect(() => {
     if (dark) {
       document.documentElement.classList.add("dark");
@@ -27,18 +30,35 @@ export default function LoginPage() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (username === "admin" && password === "123456") {
-      navigate("/dashboard");
-    } else {
-      alert("Username atau password salah!");
-    }
+    setLoading(true);
+
+    setTimeout(() => {
+      if (username === "admin" && password === "123456") {
+        setToast({ show: true, message: "Login berhasil! Mengarahkan ke dashboard...", type: "success" });
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
+      } else {
+        setToast({ show: true, message: "Username atau password salah!", type: "error" });
+      }
+      setLoading(false);
+    }, 1200);
   };
+
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => {
+        setToast((prev) => ({ ...prev, show: false }));
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   return (
     <div
       className={`min-h-screen flex items-center justify-center p-4
         bg-gradient-to-br from-slate-50 to-slate-200
-        dark:from-slate-900 dark:to-slate-800 transition-colors duration-500`}
+        dark:from-slate-900 dark:to-slate-800 transition-colors duration-500 relative`}
     >
       {/* theme toggle */}
       <button
@@ -50,80 +70,105 @@ export default function LoginPage() {
         {dark ? <FiSun className="text-yellow-400" /> : <FiMoon className="text-slate-600" />}
       </button>
 
-      {/* card */}
-      <div
-        className="w-full max-w-sm rounded-3xl shadow-xl
-          bg-white/60 dark:bg-slate-800/60 backdrop-blur-lg
-          p-8 space-y-6"
-      >
-        {/* logo */}
-        <div className="flex justify-center">
-          <img
-            src="https://i.pinimg.com/1200x/56/e9/00/56e9005a31d7d3f546d3c93f16ca8e22.jpg" /* replace with your logo */
-            alt="Logo"
-            className="w-28 h-28 rounded-full object-cover border-4 border-transparent
-              dark:border-indigo-500/50 shadow-lg"
-          />
+      {/* Loader Fullscreen */}
+      {loading && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex space-x-2">
+            <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+            <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+            <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce"></div>
+          </div>
         </div>
+      )}
 
-        <h1 className="text-center text-2xl font-bold text-slate-700 dark:text-slate-100">
-          Masuk ke Toko Cafe
-        </h1>
-
-        <form onSubmit={handleLogin} className="space-y-5">
-          {/* Username */}
-          <label className="block text-sm font-medium text-slate-600 dark:text-slate-300">
-            Username
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full h-11 px-4 rounded-xl bg-white/70 dark:bg-slate-700/70
-                border border-slate-200 dark:border-slate-600
-                focus:ring-2 focus:ring-indigo-500 focus:outline-none
-                text-slate-800 dark:text-slate-100 placeholder-slate-400"
-              placeholder="admin"
+      {/* Login Card */}
+      {!loading && (
+        <div
+          className="relative w-full max-w-sm rounded-3xl shadow-xl
+            bg-white/60 dark:bg-slate-800/60 backdrop-blur-lg
+            p-8 space-y-6"
+        >
+          {/* logo */}
+          <div className="flex justify-center">
+            <img
+              src="https://i.pinimg.com/1200x/56/e9/00/56e9005a31d7d3f546d3c93f16ca8e22.jpg"
+              alt="Logo"
+              className="w-28 h-28 rounded-full object-cover border-4 border-transparent
+                dark:border-indigo-500/50 shadow-lg"
             />
-          </label>
+          </div>
 
-          {/* Password */}
-          <label className="block text-sm font-medium text-slate-600 dark:text-slate-300">
-            Password
-            <div className="relative mt-1">
+          <h1 className="text-center text-2xl font-bold text-slate-700 dark:text-slate-100">
+            Masuk ke Toko Cafe
+          </h1>
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            {/* Username */}
+            <label className="block text-sm font-medium text-slate-600 dark:text-slate-300">
+              Username
               <input
-                type={showPwd ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="block w-full h-11 px-4 pr-12 rounded-xl bg-white/70 dark:bg-slate-700/70
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="mt-1 block w-full h-11 px-4 rounded-xl bg-white/70 dark:bg-slate-700/70
                   border border-slate-200 dark:border-slate-600
                   focus:ring-2 focus:ring-indigo-500 focus:outline-none
                   text-slate-800 dark:text-slate-100 placeholder-slate-400"
-                placeholder="123456"
+                placeholder="admin"
               />
-              <button
-                type="button"
-                onClick={() => setShowPwd(!showPwd)}
-                className="absolute inset-y-0 right-0 flex items-center px-3
-                  text-slate-500 dark:text-slate-400 hover:text-indigo-500"
-              >
-                {showPwd ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-              </button>
-            </div>
-          </label>
+            </label>
 
-          <button
-            type="submit"
-            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700
-              text-white font-semibold rounded-xl shadow-md
-              transform transition hover:scale-[1.02] active:scale-[0.98]"
-          >
-            Masuk
-          </button>
-        </form>
+            {/* Password */}
+            <label className="block text-sm font-medium text-slate-600 dark:text-slate-300">
+              Password
+              <div className="relative mt-1">
+                <input
+                  type={showPwd ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full h-11 px-4 pr-12 rounded-xl bg-white/70 dark:bg-slate-700/70
+                    border border-slate-200 dark:border-slate-600
+                    focus:ring-2 focus:ring-indigo-500 focus:outline-none
+                    text-slate-800 dark:text-slate-100 placeholder-slate-400"
+                  placeholder="123456"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd(!showPwd)}
+                  className="absolute inset-y-0 right-0 flex items-center px-3
+                    text-slate-500 dark:text-slate-400 hover:text-indigo-500"
+                >
+                  {showPwd ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                </button>
+              </div>
+            </label>
 
-        <p className="text-center text-xs text-slate-500 dark:text-slate-400">
-          Hanya karyawan resmi Toko Cafe yang dapat mengakses.
-        </p>
-      </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-11 bg-indigo-600 hover:bg-indigo-700
+                text-white font-semibold rounded-xl shadow-md
+                transform transition hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Masuk
+            </button>
+          </form>
+
+          <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+            Hanya karyawan resmi Toko Cafe yang dapat mengakses.
+          </p>
+        </div>
+      )}
+
+      {/* toast */}
+      {toast.show && (
+        <div
+          className={`fixed top-6 right-6 px-4 py-2 rounded-lg shadow-lg z-50
+          ${toast.type === "success" ? "bg-green-500" : "bg-red-500"}
+          text-white font-medium transition-all duration-300`}
+        >
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }

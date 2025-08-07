@@ -12,22 +12,15 @@ import PembeliPage from './pembeli/pembeli';
 function App() {
   return (
     <BrowserRouter>
-    <Toaster position="top-center" />
+      <Toaster position="top-right" />
       <Routes>
-        
         <Route path="/" element={<LoginPage />} />
-        
-        {/* Dashboard Admin */}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<HomePage />} />
           <Route path="riwayat" element={<RiwayatPage />} />
           <Route path="pesanan" element={<TambahPesananPage />} />
         </Route>
-
-        {/* Kasir POV */}
         <Route path="/kasir" element={<KasirPage />} />
-
-        {/* Pembeli POV */}
         <Route path="/pembeli" element={<PembeliPage />} />
       </Routes>
     </BrowserRouter>

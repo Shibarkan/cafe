@@ -8,6 +8,7 @@ import {
   LogOut,
   ShoppingBag,
   User,
+  UserStar,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -35,21 +36,36 @@ export default function DashboardLayout() {
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <aside
-        className={`fixed md:static z-40 w-72 min-h-screen bg-white border-r shadow-lg transform transition-transform duration-300 ease-in-out ${
+        className={`fixed md:static z-40 w-72 h-screen overflow-y-auto bg-white border-r shadow-lg transform transition-transform duration-300 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
       >
         {/* Header Mobile */}
         <div className="flex justify-between items-center px-6 py-4 border-b md:hidden">
-          <h1 className="text-lg font-semibold text-gray-800">Toko Cafe</h1>
+          <img
+            src="https://i.pinimg.com/1200x/56/e9/00/56e9005a31d7d3f546d3c93f16ca8e22.jpg"
+            alt="Logo"
+            className="h-15 w-15 rounded-full shadow-lg object-cover border-4 border-white"
+          />
+          <h1 className="text-xl font-bold text-gray-800 drop-shadow-md">
+            Toko Cafe
+          </h1>
           <button onClick={() => setOpen(false)}>
             <X size={24} />
           </button>
         </div>
 
         {/* Header Desktop */}
-        <div className="hidden md:flex justify-center items-center py-6 border-b">
-          <h1 className="text-2xl font-bold text-gray-800">Toko Cafe</h1>
+        <div className="hidden md:flex p-4 items-center gap-2 py-5 border-b bg-white">
+          <img
+            src="https://i.pinimg.com/1200x/56/e9/00/56e9005a31d7d3f546d3c93f16ca8e22.jpg"
+            alt="Logo"
+            className="h-8 w-8 rounded-full shadow-lg object-cover border-4 border-white"
+          />
+
+          <h1 className="text-xl font-bold text-gray-800 drop-shadow-md">
+            Toko Cafe
+          </h1>
         </div>
 
         {/* Navigation */}
@@ -81,7 +97,7 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 p-4 overflow-y-auto max-h-screen">
         {/* Mobile Toggle */}
         <button
           className="md:hidden mb-4 bg-white px-4 py-2 rounded-md shadow flex items-center gap-2"
