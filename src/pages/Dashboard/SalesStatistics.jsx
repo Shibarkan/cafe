@@ -120,6 +120,13 @@ function SalesStatistics() {
     ],
   });
 
+  const getTotalSales = (sales) => {
+    return Object.values(sales).reduce((acc, value) => acc + value, 0);
+  };
+
+  const today = new Date().toLocaleDateString();
+  const todaySales = dailySales[today] || 0;
+
   return (
     <div>
       <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-10 text-center">
@@ -128,6 +135,12 @@ function SalesStatistics() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-md">
+          <div className="mb-4">
+            <strong>Omset Total Penjualan Harian:</strong> Rp {getTotalSales(dailySales).toLocaleString()}
+          </div>
+          <div className="mb-4">
+            <strong>Omset Hari Ini:</strong> Rp {todaySales.toLocaleString()}
+          </div>
           <Bar
             data={createChartData('Penjualan Harian', dailyLabels, Object.values(dailySales), '#3b82f6')}
             options={chartOptions('Penjualan Harian')}
@@ -135,6 +148,9 @@ function SalesStatistics() {
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-md">
+          <div className="mb-4">
+            <strong>Omset Total Penjualan Mingguan:</strong> Rp {getTotalSales(weeklySales).toLocaleString()}
+          </div>
           <Bar
             data={createChartData('Penjualan Mingguan', weeklyLabels, Object.values(weeklySales), '#8b5cf6')}
             options={chartOptions('Penjualan Mingguan')}
@@ -142,6 +158,9 @@ function SalesStatistics() {
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-md">
+          <div className="mb-4">
+            <strong>Omset Total Penjualan Bulanan:</strong> Rp {getTotalSales(monthlySales).toLocaleString()}
+          </div>
           <Bar
             data={createChartData('Penjualan Bulanan', monthlyLabels, Object.values(monthlySales), '#f97316')}
             options={chartOptions('Penjualan Bulanan')}
@@ -149,6 +168,9 @@ function SalesStatistics() {
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-md">
+          <div className="mb-4">
+            <strong>Omset Total Penjualan per Kategori:</strong> Rp {getTotalSales(categorySales).toLocaleString()}
+          </div>
           <Bar
             data={createChartData('Penjualan per Kategori', categoryLabels, Object.values(categorySales), '#10b981')}
             options={chartOptions('Penjualan per Kategori')}

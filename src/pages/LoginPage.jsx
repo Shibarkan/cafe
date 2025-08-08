@@ -1,7 +1,51 @@
 // src/pages/LoginPage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiEye, FiEyeOff, FiSun, FiMoon } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiSun, FiMoon, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+
+// 🔹 Komponen Loader
+const Loader = () => (
+  <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+    <div className="flex space-x-2">
+      <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+      <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+      <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" />
+    </div>
+  </div>
+);
+
+// 🔹 Komponen Toast
+const Toast = ({ show, message, type }) => (
+  <AnimatePresence>
+    {show && (
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.4 }}
+        className={`fixed top-6 right-6 px-4 py-2 rounded-lg shadow-lg z-50
+          ${type === "success" ? "bg-green-500" : "bg-red-500"}
+          text-white font-medium flex items-center space-x-2`}
+      >
+        {type === "success" ? <FiCheckCircle size={18} /> : <FiXCircle size={18} />}
+        <span>{message}</span>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+// 🔹 Komponen ThemeToggle
+const ThemeToggle = ({ dark, toggle }) => (
+  <button
+    onClick={toggle}
+    className="absolute top-5 right-5 p-2 rounded-full bg-white/30 dark:bg-slate-700/30
+      hover:bg-white/50 dark:hover:bg-slate-700/50 transition"
+    aria-label="Toggle dark mode"
+  >
+    {dark ? <FiSun className="text-yellow-400" /> : <FiMoon className="text-slate-600" />}
+  </button>
+);
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -18,15 +62,19 @@ export default function LoginPage() {
 
   const navigate = useNavigate();
 
+  // Theme effect
   useEffect(() => {
-    if (dark) {
-      document.documentElement.classList.add("dark");
-      localStorage.theme = "dark";
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.theme = "light";
-    }
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.theme = dark ? "dark" : "light";
   }, [dark]);
+
+  // Hide toast after delay
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => setToast((t) => ({ ...t, show: false })), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -35,60 +83,38 @@ export default function LoginPage() {
     setTimeout(() => {
       if (username === "admin" && password === "123456") {
         setToast({ show: true, message: "Login berhasil! Mengarahkan ke dashboard...", type: "success" });
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 1500);
+        setTimeout(() => navigate("/dashboard"), 1500);
       } else {
         setToast({ show: true, message: "Username atau password salah!", type: "error" });
       }
       setLoading(false);
-    }, 1200);
+    }, 1000);
   };
-
-  useEffect(() => {
-    if (toast.show) {
-      const timer = setTimeout(() => {
-        setToast((prev) => ({ ...prev, show: false }));
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center p-4
+      className="min-h-screen flex items-center justify-center p-4
         bg-gradient-to-br from-slate-50 to-slate-200
-        dark:from-slate-900 dark:to-slate-800 transition-colors duration-500 relative`}
+        dark:from-slate-900 dark:to-slate-800 transition-colors duration-500 relative"
     >
-      {/* theme toggle */}
-      <button
-        onClick={() => setDark(!dark)}
-        className="absolute top-5 right-5 p-2 rounded-full bg-white/30 dark:bg-slate-700/30
-          hover:bg-white/50 dark:hover:bg-slate-700/50 transition"
-        aria-label="Toggle dark mode"
-      >
-        {dark ? <FiSun className="text-yellow-400" /> : <FiMoon className="text-slate-600" />}
-      </button>
+      {/* Theme Toggle */}
+      <ThemeToggle dark={dark} toggle={() => setDark((d) => !d)} />
 
-      {/* Loader Fullscreen */}
-      {loading && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
-          <div className="flex space-x-2">
-            <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-            <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-            <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce"></div>
-          </div>
-        </div>
-      )}
+      {/* Loader */}
+      {loading && <Loader />}
 
       {/* Login Card */}
       {!loading && (
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
           className="relative w-full max-w-sm rounded-3xl shadow-xl
-            bg-white/60 dark:bg-slate-800/60 backdrop-blur-lg
+            bg-white/10 dark:bg-slate-800/30 backdrop-blur-xl
+            border border-white/20 dark:border-slate-600
             p-8 space-y-6"
         >
-          {/* logo */}
+          {/* Logo */}
           <div className="flex justify-center">
             <img
               src="https://i.pinimg.com/1200x/56/e9/00/56e9005a31d7d3f546d3c93f16ca8e22.jpg"
@@ -125,6 +151,7 @@ export default function LoginPage() {
                   type={showPwd ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin(e)}
                   className="block w-full h-11 px-4 pr-12 rounded-xl bg-white/70 dark:bg-slate-700/70
                     border border-slate-200 dark:border-slate-600
                     focus:ring-2 focus:ring-indigo-500 focus:outline-none
@@ -133,7 +160,7 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPwd(!showPwd)}
+                  onClick={() => setShowPwd((s) => !s)}
                   className="absolute inset-y-0 right-0 flex items-center px-3
                     text-slate-500 dark:text-slate-400 hover:text-indigo-500"
                 >
@@ -145,9 +172,10 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-indigo-600 hover:bg-indigo-700
+              className={`w-full h-11 bg-indigo-600 hover:bg-indigo-700
                 text-white font-semibold rounded-xl shadow-md
-                transform transition hover:scale-[1.02] active:scale-[0.98]"
+                transform transition hover:scale-[1.02] active:scale-[0.98]
+                ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
             >
               Masuk
             </button>
@@ -156,19 +184,11 @@ export default function LoginPage() {
           <p className="text-center text-xs text-slate-500 dark:text-slate-400">
             Hanya karyawan resmi Toko Cafe yang dapat mengakses.
           </p>
-        </div>
+        </motion.div>
       )}
 
-      {/* toast */}
-      {toast.show && (
-        <div
-          className={`fixed top-6 right-6 px-4 py-2 rounded-lg shadow-lg z-50
-          ${toast.type === "success" ? "bg-green-500" : "bg-red-500"}
-          text-white font-medium transition-all duration-300`}
-        >
-          {toast.message}
-        </div>
-      )}
+      {/* Toast */}
+      <Toast show={toast.show} message={toast.message} type={toast.type} />
     </div>
   );
 }

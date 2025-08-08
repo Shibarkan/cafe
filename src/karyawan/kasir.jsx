@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus, Minus, CheckCircle, Sun, Moon } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
+import { motion } from "framer-motion";
 
 import menuData from "../data/products";
 import { saveCart } from "../helper/cartStorage";
@@ -15,6 +16,7 @@ export default function KasirPage() {
         window.matchMedia("(prefers-color-scheme: dark)").matches)
   );
 
+  // Handle dark mode toggle
   if (dark) {
     document.documentElement.classList.add("dark");
     localStorage.theme = "dark";
@@ -72,19 +74,18 @@ export default function KasirPage() {
       JSON.stringify([...existingTransactions, transaction])
     );
 
-    toast.success("Checkout berhasil! Terima kasih ");
+    toast.success("Checkout berhasil! Terima kasih");
     setCart([]);
     saveCart([]);
     localStorage.setItem("paymentSuccess", "1");
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-300">
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-300 dark:from-slate-900 dark:to-slate-800 text-slate-800 dark:text-slate-100 transition-colors duration-300 relative">
       {/* Theme Toggle */}
       <button
         onClick={() => setDark(!dark)}
-        className="fixed top-4 right-4 p-2 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition"
+        className="fixed top-4 right-4 p-2 rounded-full bg-white/30 dark:bg-slate-700/30 backdrop-blur-md shadow-lg hover:scale-105 transition"
         aria-label="Toggle dark mode"
       >
         {dark ? (
@@ -95,9 +96,14 @@ export default function KasirPage() {
       </button>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="text-4xl font-bold mb-10 text-center tracking-tight text-slate-800 dark:text-white">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl font-bold mb-10 text-center tracking-tight text-slate-800 dark:text-white"
+        >
           Kasir - Tambah Pesanan
-        </h1>
+        </motion.h1>
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3 mb-10 justify-center">
@@ -108,10 +114,9 @@ export default function KasirPage() {
               className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200
                 ${
                   selectedCategory === cat
-                    ? "bg-emerald-600 text-white shadow"
-                    : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-100 dark:hover:bg-slate-700"
-                }
-              `}
+                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg"
+                    : "bg-white/70 dark:bg-slate-700/70 text-slate-700 dark:text-slate-300 hover:bg-emerald-100 dark:hover:bg-slate-600"
+                }`}
             >
               {cat.charAt(0).toUpperCase() + cat.slice(1)}
             </button>
@@ -125,9 +130,10 @@ export default function KasirPage() {
             {filteredMenu.map((item) => {
               const inCart = cart.find((c) => c.id === item.id);
               return (
-                <div
+                <motion.div
                   key={item.id}
-                  className="bg-white dark:bg-slate-800 rounded-2xl shadow-md hover:shadow-lg transition hover:-translate-y-1 overflow-hidden flex flex-col"
+                  whileHover={{ scale: 1.03 }}
+                  className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-lg rounded-2xl shadow-xl transition overflow-hidden flex flex-col border border-white/20 dark:border-slate-700"
                 >
                   <img
                     src={item.img}
@@ -160,14 +166,19 @@ export default function KasirPage() {
                       </button>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
 
           {/* Cart Summary */}
           {cart.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 sticky top-8">
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl shadow-xl p-6 sticky top-8 border border-white/20 dark:border-slate-700"
+            >
               <h2 className="text-xl font-bold mb-4">Ringkasan Pesanan</h2>
               <div className="max-h-72 overflow-y-auto mb-4 divide-y divide-slate-200 dark:divide-slate-700">
                 {cart.map((item) => (
@@ -195,14 +206,15 @@ export default function KasirPage() {
               </div>
               <button
                 onClick={handleCheckout}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition"
+                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition"
               >
                 <CheckCircle size={18} /> Checkout
               </button>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
+      <Toaster position="top-right" />
     </div>
   );
 }
