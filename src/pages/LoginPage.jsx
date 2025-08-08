@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff, FiSun, FiMoon, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 
-// 🔹 Komponen Loader
 const Loader = () => (
   <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
     <div className="flex space-x-2">
@@ -15,7 +14,6 @@ const Loader = () => (
   </div>
 );
 
-// 🔹 Komponen Toast
 const Toast = ({ show, message, type }) => (
   <AnimatePresence>
     {show && (
@@ -35,7 +33,6 @@ const Toast = ({ show, message, type }) => (
   </AnimatePresence>
 );
 
-// 🔹 Komponen ThemeToggle
 const ThemeToggle = ({ dark, toggle }) => (
   <button
     onClick={toggle}
@@ -62,13 +59,18 @@ export default function LoginPage() {
 
   const navigate = useNavigate();
 
-  // Theme effect
+  // 🔹 Cek jika sudah login → langsung redirect ke dashboard
+  useEffect(() => {
+    if (localStorage.getItem("isLoggedIn") === "true") {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
+
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.theme = dark ? "dark" : "light";
   }, [dark]);
 
-  // Hide toast after delay
   useEffect(() => {
     if (toast.show) {
       const timer = setTimeout(() => setToast((t) => ({ ...t, show: false })), 3000);
@@ -82,6 +84,9 @@ export default function LoginPage() {
 
     setTimeout(() => {
       if (username === "admin" && password === "123456") {
+        // 🔹 Simpan status login
+        localStorage.setItem("isLoggedIn", "true");
+
         setToast({ show: true, message: "Login berhasil! Mengarahkan ke dashboard...", type: "success" });
         setTimeout(() => navigate("/dashboard"), 1500);
       } else {
@@ -97,13 +102,9 @@ export default function LoginPage() {
         bg-gradient-to-br from-slate-50 to-slate-200
         dark:from-slate-900 dark:to-slate-800 transition-colors duration-500 relative"
     >
-      {/* Theme Toggle */}
       <ThemeToggle dark={dark} toggle={() => setDark((d) => !d)} />
-
-      {/* Loader */}
       {loading && <Loader />}
 
-      {/* Login Card */}
       {!loading && (
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -114,7 +115,6 @@ export default function LoginPage() {
             border border-white/20 dark:border-slate-600
             p-8 space-y-6"
         >
-          {/* Logo */}
           <div className="flex justify-center">
             <img
               src="https://i.pinimg.com/1200x/56/e9/00/56e9005a31d7d3f546d3c93f16ca8e22.jpg"
@@ -129,7 +129,6 @@ export default function LoginPage() {
           </h1>
 
           <form onSubmit={handleLogin} className="space-y-5">
-            {/* Username */}
             <label className="block text-sm font-medium text-slate-600 dark:text-slate-300">
               Username
               <input
@@ -143,7 +142,6 @@ export default function LoginPage() {
               />
             </label>
 
-            {/* Password */}
             <label className="block text-sm font-medium text-slate-600 dark:text-slate-300">
               Password
               <div className="relative mt-1">
@@ -186,8 +184,6 @@ export default function LoginPage() {
           </p>
         </motion.div>
       )}
-
-      {/* Toast */}
       <Toast show={toast.show} message={toast.message} type={toast.type} />
     </div>
   );

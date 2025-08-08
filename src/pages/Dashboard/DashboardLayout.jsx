@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
   X,
@@ -8,29 +8,26 @@ import {
   LogOut,
   ShoppingBag,
   User,
-  UserStar,
 } from "lucide-react";
 import { useState } from "react";
 
 export default function DashboardLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   const navItems = [
     { name: "Statistik", to: "/dashboard", icon: <LineChart size={18} /> },
-    {
-      name: "Riwayat Transaksi",
-      to: "/dashboard/riwayat",
-      icon: <Clock size={18} />,
-    },
-    {
-      name: "Tambah Menu",
-      to: "/dashboard/pesanan",
-      icon: <UtensilsCrossed size={18} />,
-    },
+    { name: "Riwayat Transaksi", to: "/dashboard/riwayat", icon: <Clock size={18} /> },
+    { name: "Tambah Menu", to: "/dashboard/pesanan", icon: <UtensilsCrossed size={18} /> },
     { name: "Kasir", to: "/kasir", icon: <ShoppingBag size={18} /> },
     { name: "Pembeli", to: "/pembeli", icon: <User size={18} /> },
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    navigate("/");
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -47,9 +44,7 @@ export default function DashboardLayout() {
             alt="Logo"
             className="h-15 w-15 rounded-full shadow-lg object-cover border-4 border-white"
           />
-          <h1 className="text-xl font-bold text-gray-800 drop-shadow-md">
-            Toko Cafe
-          </h1>
+          <h1 className="text-xl font-bold text-gray-800 drop-shadow-md">Toko Cafe</h1>
           <button onClick={() => setOpen(false)}>
             <X size={24} />
           </button>
@@ -62,10 +57,7 @@ export default function DashboardLayout() {
             alt="Logo"
             className="h-8 w-8 rounded-full shadow-lg object-cover border-4 border-white"
           />
-
-          <h1 className="text-xl font-bold text-gray-800 drop-shadow-md">
-            Toko Cafe
-          </h1>
+          <h1 className="text-xl font-bold text-gray-800 drop-shadow-md">Toko Cafe</h1>
         </div>
 
         {/* Navigation */}
@@ -86,13 +78,14 @@ export default function DashboardLayout() {
             </Link>
           ))}
 
-          <Link
-            to="/"
-            className="flex items-center gap-3 px-4 py-2 mt-8 rounded-md text-sm font-medium text-red-500 hover:bg-red-100 transition-colors"
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-2 mt-8 rounded-md text-sm font-medium text-red-500 hover:bg-red-100 transition-colors w-full text-left"
           >
             <LogOut size={18} />
             Logout
-          </Link>
+          </button>
         </nav>
       </aside>
 

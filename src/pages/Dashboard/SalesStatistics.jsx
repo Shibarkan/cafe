@@ -1,3 +1,4 @@
+// src/pages/SalesStatistics.jsx
 import React, { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -9,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { supabase } from '../../lib/supabaseClient';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -22,9 +24,33 @@ function SalesStatistics() {
   const [salesData, setSalesData] = useState([]);
 
   useEffect(() => {
-    const storedTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
-    setSalesData(storedTransactions);
+    fetchSales();
   }, []);
+
+  async function fetchSales() {
+    try {
+      // Ambil transaksi beserta items
+      const { data: txs, error: txError } = await supabase.from('transactions').select('*').order('date', { ascending: true });
+      if (txError) throw txError;
+
+      const txIds = txs.map((t) => t.id);
+      let items = [];
+      if (txIds.length) {
+        const { data: its, error: itErr } = await supabase.from('transaction_items').select('*').in('transaction_id', txIds);
+        if (itErr) throw itErr;
+        items = its;
+      }
+
+      // Buat structure transactions with items
+      const merged = txs.map((t) => ({ ...t, items: items.filter((it) => it.transaction_id === t.id) }));
+      setSalesData(merged);
+    } catch (err) {
+      console.error(err);
+      // fallback localStorage
+      const storedTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+      setSalesData(storedTransactions);
+    }
+  }
 
   const getDailySales = () => {
     const dailySales = {};
@@ -56,15 +82,14 @@ function SalesStatistics() {
   const getCategorySales = () => {
     const categorySales = {};
     salesData.forEach((transaction) => {
-      transaction.items.forEach((item) => {
+      (transaction.items || []).forEach((item) => {
         categorySales[item.category] = (categorySales[item.category] || 0) + item.price * item.quantity;
       });
     });
     return categorySales;
   };
 
-  const formatMonth = (monthIndex) =>
-    new Date(0, monthIndex).toLocaleString('default', { month: 'short' });
+  const formatMonth = (monthIndex) => new Date(0, monthIndex).toLocaleString('default', { month: 'short' });
 
   const dailySales = getDailySales();
   const weeklySales = getWeeklySales();
@@ -97,14 +122,8 @@ function SalesStatistics() {
       },
     },
     scales: {
-      x: {
-        ticks: { color: '#475569' },
-        grid: { display: false },
-      },
-      y: {
-        ticks: { color: '#475569' },
-        grid: { color: '#cbd5e1' },
-      },
+      x: { ticks: { color: '#475569' }, grid: { display: false } },
+      y: { ticks: { color: '#475569' }, grid: { color: '#cbd5e1' } },
     },
   });
 
@@ -120,61 +139,34 @@ function SalesStatistics() {
     ],
   });
 
-  const getTotalSales = (sales) => {
-    return Object.values(sales).reduce((acc, value) => acc + value, 0);
-  };
-
+  const getTotalSales = (sales) => Object.values(sales).reduce((acc, value) => acc + value, 0);
   const today = new Date().toLocaleDateString();
   const todaySales = dailySales[today] || 0;
 
   return (
-    <div>
-      <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-10 text-center">
-        Statistik Penjualan
-      </h2>
+    <div className="p-6">
+      <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-10 text-center">Statistik Penjualan</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-md">
-          <div className="mb-4">
-            <strong>Omset Total Penjualan Harian:</strong> Rp {getTotalSales(dailySales).toLocaleString()}
-          </div>
-          <div className="mb-4">
-            <strong>Omset Hari Ini:</strong> Rp {todaySales.toLocaleString()}
-          </div>
-          <Bar
-            data={createChartData('Penjualan Harian', dailyLabels, Object.values(dailySales), '#3b82f6')}
-            options={chartOptions('Penjualan Harian')}
-          />
+          <div className="mb-4"><strong>Omset Total Penjualan Harian:</strong> Rp {getTotalSales(dailySales).toLocaleString()}</div>
+          <div className="mb-4"><strong>Omset Hari Ini:</strong> Rp {todaySales.toLocaleString()}</div>
+          <Bar data={createChartData('Penjualan Harian', dailyLabels, Object.values(dailySales), '#3b82f6')} options={chartOptions('Penjualan Harian')} />
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-md">
-          <div className="mb-4">
-            <strong>Omset Total Penjualan Mingguan:</strong> Rp {getTotalSales(weeklySales).toLocaleString()}
-          </div>
-          <Bar
-            data={createChartData('Penjualan Mingguan', weeklyLabels, Object.values(weeklySales), '#8b5cf6')}
-            options={chartOptions('Penjualan Mingguan')}
-          />
+          <div className="mb-4"><strong>Omset Total Penjualan Mingguan:</strong> Rp {getTotalSales(weeklySales).toLocaleString()}</div>
+          <Bar data={createChartData('Penjualan Mingguan', weeklyLabels, Object.values(weeklySales), '#8b5cf6')} options={chartOptions('Penjualan Mingguan')} />
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-md">
-          <div className="mb-4">
-            <strong>Omset Total Penjualan Bulanan:</strong> Rp {getTotalSales(monthlySales).toLocaleString()}
-          </div>
-          <Bar
-            data={createChartData('Penjualan Bulanan', monthlyLabels, Object.values(monthlySales), '#f97316')}
-            options={chartOptions('Penjualan Bulanan')}
-          />
+          <div className="mb-4"><strong>Omset Total Penjualan Bulanan:</strong> Rp {getTotalSales(monthlySales).toLocaleString()}</div>
+          <Bar data={createChartData('Penjualan Bulanan', monthlyLabels, Object.values(monthlySales), '#f97316')} options={chartOptions('Penjualan Bulanan')} />
         </div>
 
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-md">
-          <div className="mb-4">
-            <strong>Omset Total Penjualan per Kategori:</strong> Rp {getTotalSales(categorySales).toLocaleString()}
-          </div>
-          <Bar
-            data={createChartData('Penjualan per Kategori', categoryLabels, Object.values(categorySales), '#10b981')}
-            options={chartOptions('Penjualan per Kategori')}
-          />
+          <div className="mb-4"><strong>Omset Total Penjualan per Kategori:</strong> Rp {getTotalSales(categorySales).toLocaleString()}</div>
+          <Bar data={createChartData('Penjualan per Kategori', categoryLabels, Object.values(categorySales), '#10b981')} options={chartOptions('Penjualan per Kategori')} />
         </div>
       </div>
     </div>
